@@ -14,10 +14,11 @@ class Product:
         self.stats = stats
 
     def __str__(self):
+        nl = "\n\n"
         return f"""product_id :{self.product_id}
             product.name :{self.product_name}
             stats :{json.dumps(self.stats, indent=4,ensure_ascii=False)}
-            reviews:{"\n\n".join(str(review) for review in self.reviews)}
+            reviews:{n1.join(str(review) for review in self.reviews)}
         """
     
     def reviews_to_dict(self):
@@ -33,7 +34,7 @@ class Product:
     def extract_name(self):
         next_page = f"https://www.ceneo.pl/{self.product_id}#tab=reviews"
         response = requests.get(next_page, headers=headers)
-        if response.status_code = 200:
+        if response.status_code == 200:
             page_dom = BeautifulSoup(response.text, "html.parser")
             self.product_name = extract(page_dom, "h1")
         else:
@@ -51,19 +52,11 @@ class Product:
                 print(len(reviews))
                 for review in reviews:
                     single_review = Review()
-                    single_review.extract_features()
-                    single_review.transform()
-                    self.review.appeand(single_review)
-                    {
-                        key: extract(review, *value)
-                        for key, value in review_schema.items()
-
-                    }
-            all_reviews.append(single_review)
-        try:
-            next_page = "https://www.ceneo.pl"+extract(page_dom, "a.pagination__next", "href")
-        except TypeError:
-            next_page = None  
+                    self.reviews.append(single_review.extract_features(review).transform())
+            try:
+                next_page = "https://www.ceneo.pl"+extract(page_dom, "a.pagination__next", "href")
+            except TypeError:
+                next_page = None  
         return self   
 
     def calculate_stats(self):
@@ -74,6 +67,7 @@ class Product:
         self.stats["cons_count"] =  reviews.cons.astype(bool).sum()
         self.stats["pros_cons_count"] = reviews.apply(lambda r: bool(r.pros) and bool(r.cons), axis = 1)
         self.stats["average_stars"] = round(reviews.stars.mean(),2)
+        return self
     
     def export_reviews(self):
         if not os.path.exists("./app/data/opinions"):
