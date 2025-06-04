@@ -38,7 +38,7 @@ class Product:
             page_dom = BeautifulSoup(response.text, "html.parser")
             self.product_name = extract(page_dom, "h1")
         else:
-            self.product_name , ""
+            self.product_name = ""
         return self
 
     def extract_review(self):
@@ -70,6 +70,8 @@ class Product:
         return self
     
     def export_reviews(self):
+        if not os.path.exists("./app/data"):
+            os.mkdir("./app/data")
         if not os.path.exists("./app/data/opinions"):
             os.mkdir("./app/data/opinions")
         with open(f"./app/data/opinions/{self.product_id}.json", "w", encoding="UTF-8") as jf:
