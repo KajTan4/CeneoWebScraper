@@ -4,6 +4,8 @@ from app.models.product import Product
 
 from app import app
 
+import os
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -14,14 +16,23 @@ def display_form():
 
 @app.route("/extract", methods=['POST'])
 def extract():
-   product_id = request.form.get("product_id")
-   product = Product(product_id)
-   product.export_reviews()
-   product.export_info()
-   return redirect(url_for('product', product_id = product_id))
+   form = ProductForm(request.form)
+   if form.validate():
+        product_id = request.form.get("product_id")
+        product = Product(product_id)
+        product.extract_review().extract_name().calculate_stats()
+        product.export_reviews()
+        product.export_info()
+        return redirect(url_for('product', product_id = product_id))
+   else:
+       return render_template("extract.html",form=form)
 
 @app.route("/products")
 def products():
+    products_files = os.listdir("./app/data/products")
+    for filename in products_files:
+        with open(f"./app/data/products/{filename}","r"endcoding="UTF-8") as jf:
+            product = Product(filename.split, "."
     return render_template('products.html')
     
 
