@@ -32,26 +32,26 @@ class Review:
         self.publish_date = publish_date
         self.purchase_date = purchase_date
 
-def __str__(self):
-    return "\n".join([f"{feature}: {getattr(self, feature)}" for feature in self.review_schema.keys()])
+    def __str__(self):
+        return "\n".join([f"{feature}: {getattr(self,feature)}"  for feature in self.review_schema.keys()])
 
-def to_dict(self):
-    return {feature.getattr(self, feature) for feature in self.review_schema.keys()}
+    def to_dict(self):
+        return {feature: getattr(self,feature)  for feature in self.review_schema.keys()}
 
-def  from_dict(self,review_dict):
-    for key in self.review_scheme.keys():
-        setattr(self,key,review_dict[key])
+    def  from_dict(self,review_dict):
+        for key in self.review_scheme.keys():
+            setattr(self,key,review_dict[key])
 
-def extract_features(self, review):
-    for key, value in self.review_schema.items():
-          setattr(self, key, extract(review, *value))
-    return self
+    def extract_features(self, review):
+        for key, value in self.review_schema.items():
+              setattr(self, key, extract(review, *value))
+        return self
 
-def transform(self):
-    self.stars = float(self.stars.split("/")[0].replace(",", "."))
-    self.likes = int(self.likes)
-    self.dislikes = int(self.dislikes)
-    return self
+    def transform(self):
+        self.stars = float(self.stars.split("/")[0].replace(",", "."))
+        self.likes = int(self.likes)
+        self.dislikes = int(self.dislikes)
+        return self
 
 
 

@@ -9,22 +9,21 @@ from app.models.review import Review
 
 
 class Product:
-    def __init__(self, product_id, reviews = [], product_name = "", stats = {}):
+    def __init__(self, product_id, reviews=[], product_name="", stats = {}):
         self.product_id = product_id
         self.reviews = reviews
         self.product_name = product_name
         self.stats = stats
 
     def __str__(self):
-        nl = "\n\n"
-        return f"""product_id :{self.product_id}
-            product.name :{self.product_name}
-            stats :{json.dumps(self.stats, indent=4,ensure_ascii=False)}
-            reviews:{nl.join([str(review) for review in self.reviews])}
-        """
+        nl="\n\n"
+        return f"""product_id: {self.product_id}
+            product_name: {self.product_name}
+            stats: {json.dumps(self.stats, indent=4, ensure_ascii=False)}
+            reviews: {nl.join([str(review) for review in self.reviews])}"""
     
     def reviews_to_dict(self):
-        return {review.to_dict() for review in self.reviews}
+        return [review.to_dict() for review in self.reviews]
 
     def info_to_dict(self):
         return{
@@ -52,11 +51,11 @@ class Product:
         response = requests.get(next_page, headers=headers)
         if response.status_code == 200:
             page_dom = BeautifulSoup(response.text, "html.parser")
-            opinions_count = extract(page_dom, "a.product-reviews_link > span")
-            if opinions_count:
+            opinions_counts = extract(page_dom, "a.product-review__link > span")
+            if opinions_counts:
                 return False
             else:
-                return "Dla produktu o podanym kodzie nie ma jeszcze opinii "
+                return "Dla produktu o podanym kodzie nie ma jeszcze opinii"
         else:
             return "Produkt o podanym kodzie nie istnieje"
     
@@ -91,7 +90,7 @@ class Product:
         return self  
 
     def calculate_stats(self):
-        reviews = pd.DataFrame.from_dict(self.reviews_to_dict)
+        reviews = pd.DataFrame.from_dict(self.reviews_to_dict())
         
         self.stats["review_count"] = int(reviews.shape[0])
         self.stats["pros_count"] = int(reviews.pros.astype(bool).sum())
