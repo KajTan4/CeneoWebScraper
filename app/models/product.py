@@ -3,6 +3,8 @@ import  pandas as pd
 import os
 import requests
 from bs4 import BeautifulSoup
+from config import headers
+from app.utils import extract
 from app.models.review import Review
 
 
@@ -18,7 +20,7 @@ class Product:
         return f"""product_id :{self.product_id}
             product.name :{self.product_name}
             stats :{json.dumps(self.stats, indent=4,ensure_ascii=False)}
-            reviews:{n1.join(str(review) for review in self.reviews)}
+            reviews:{nl.join([str(review) for review in self.reviews])}
         """
     
     def reviews_to_dict(self):
@@ -26,25 +28,26 @@ class Product:
 
     def info_to_dict(self):
         return{
-            "product_id ": self.product_id,
-            "product_name ": self.product_name,
-            "stats ": self.stats
+            "product_id": self.product_id,
+            "product_name": self.product_name,
+            "stats": self.stats
         }
     
-    def info_from_dict(self):
-        return {
-            self.product_id = info['product_id'],
-            self.product_name = info['product_name'],
-            self.stats = info['stats']
-        }
+    def info_from_dict(self, info):
+        self.product_id = info['product_id'],
+        self.product_name = info['product_name'],
+        self.stats = info['stats']
+        
     
-    def reviews_from_dict(self,reviews_list)
+    def reviews_from_dict(self,reviews_list):
         for review_dict in reviews_list:
             review = Review()
+            review.from_dict(review_dict)
+            self.reviews.append(review)
             
 
 
-    def if_exist(self):
+    def if_not_exists(self):
         next_page = f"https://www.ceneo.pl/{self.product_id}#tab=reviews"
         response = requests.get(next_page, headers=headers)
         if response.status_code == 200:
@@ -67,7 +70,7 @@ class Product:
             self.product_name = ""
         return self
 
-    def extract_review(self):
+    def extract_reviews(self):
         next_page = f"https://www.ceneo.pl/{self.product_id}#tab=reviews"
         while next_page:
             response = requests.get(next_page, headers=headers)
@@ -79,19 +82,21 @@ class Product:
                 for review in reviews:
                     single_review = Review()
                     self.reviews.append(single_review.extract_features(review).transform())
-            try:
-                next_page = "https://www.ceneo.pl"+extract(page_dom, "a.pagination__next", "href")
-            except TypeError:
-                next_page = None  
-        return self   
+                try:
+                    next_page = "https://www.ceneo.pl"+extract(page_dom, "a.pagination__next", "href")
+                except TypeError:
+                    next_page = None     
+            else:
+                next_page = None
+        return self  
 
     def calculate_stats(self):
         reviews = pd.DataFrame.from_dict(self.reviews_to_dict)
         
-        self.stats["review_count"] = reviews.shape[0]
-        self.stats["pros_count"] = reviews.pros.astype(bool).sum()
-        self.stats["cons_count"] =  reviews.cons.astype(bool).sum()
-        self.stats["pros_cons_count"] = reviews.apply(lambda r: bool(r.pros) and bool(r.cons), axis = 1)
+        self.stats["review_count"] = int(reviews.shape[0])
+        self.stats["pros_count"] = int(reviews.pros.astype(bool).sum())
+        self.stats["cons_count"] =  int(reviews.cons.astype(bool).sum())
+        self.stats["pros_cons_count"] = int(reviews.apply(lambda r: bool(r.pros) and bool(r.cons), axis = 1).sum())
         self.stats["average_stars"] = round(reviews.stars.mean(),2)
         return self
     

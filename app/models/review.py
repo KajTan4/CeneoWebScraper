@@ -33,14 +33,14 @@ class Review:
         self.purchase_date = purchase_date
 
 def __str__(self):
-    return "\n".joint([f"{feature}: {getattr(self, feature)}" for feature in self.review_schema.keys()])
+    return "\n".join([f"{feature}: {getattr(self, feature)}" for feature in self.review_schema.keys()])
 
 def to_dict(self):
     return {feature.getattr(self, feature) for feature in self.review_schema.keys()}
 
 def  from_dict(self,review_dict):
     for key in self.review_scheme.keys():
-        setattr(self,key,review_dict(key))
+        setattr(self,key,review_dict[key])
 
 def extract_features(self, review):
     for key, value in self.review_schema.items():
